@@ -1,7 +1,6 @@
 package crudapp.model;
 
 import org.springframework.stereotype.Repository;
-
 import javax.persistence.*;
 
 @Entity

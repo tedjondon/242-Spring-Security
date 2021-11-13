@@ -1,59 +1,52 @@
 package crudapp.dao;
 
 import crudapp.model.User;
-import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import java.util.List;
 
 @Repository
 public class UserDaoImpl implements UserDao {
 
-    @Autowired
-    private SessionFactory sessionFactory;
+    @PersistenceContext
+    private EntityManager em;
 
     @Override
     public void add(User user) {
-        sessionFactory.getCurrentSession().save(user);
+
+        em.persist(user);
+
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public List<User> listUsers() {
-        TypedQuery<User> query=sessionFactory.getCurrentSession().createQuery("from User");
+        Query query = em.createQuery("from User", User.class);
         return query.getResultList();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public User getUserById(int id) {
-        TypedQuery<User> query=sessionFactory.getCurrentSession().createQuery(
-                "from User where id = :param"
-        );
-        query.setParameter("param", id);
-        return query.getSingleResult();
+        return em.find(User.class, id);
     }
 
     @Override
     public void updateUser(int id, User updatedUser) {
-        Query query=sessionFactory.getCurrentSession().createQuery(
-                "update User set name = :paramName where id = :paramId"
-        );
-        query.setParameter("paramName", updatedUser.getName());
-        query.setParameter("paramId", id);
-        query.executeUpdate();
+        em.merge(updatedUser);
+        em.flush();
     }
 
     @Override
     public void deleteUser(int id) {
-        Query query=sessionFactory.getCurrentSession().createQuery(
-                "delete User where id = :paramId"
-        );
-        query.setParameter("paramId", id);
-        query.executeUpdate();
+        User user = getUserById(id);
+        if (null == user) {
+            throw new NullPointerException("User not found");
+        }
+        em.remove(user);
+        em.flush();
     }
 
 }
