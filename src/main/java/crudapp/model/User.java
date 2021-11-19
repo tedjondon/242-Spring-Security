@@ -1,23 +1,33 @@
 package crudapp.model;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import javax.persistence.*;
+import java.util.Collection;
+import java.util.Set;
 
 @Entity
-@Table
-public class User {
+@Table(name = "users")
+public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column
+
+    @Column(unique = true)
     private String name;
+    @Column
+    private String password;
+    @ManyToMany(fetch = FetchType.EAGER)
+    private Set<Role> roles;
 
     public User() {
     }
 
-    public User(int id, String name) {
-        this.id = id;
+    public User(String name, String password, Set<Role> roles) {
         this.name = name;
+        this.password = password;
+        this.roles = roles;
     }
 
     public int getId() {
@@ -28,6 +38,10 @@ public class User {
         return name;
     }
 
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
     public void setId(int id) {
         this.id = id;
     }
@@ -35,4 +49,47 @@ public class User {
     public void setName(String name) {
         this.name = name;
     }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    @Override
+    public String getUsername() {
+        return name;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
 }

@@ -15,9 +15,7 @@ public class UserDaoImpl implements UserDao {
 
     @Override
     public void add(User user) {
-
         em.persist(user);
-
     }
 
     @Override
@@ -31,6 +29,15 @@ public class UserDaoImpl implements UserDao {
     @SuppressWarnings("unchecked")
     public User getUserById(int id) {
         return em.find(User.class, id);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public User getUserByName(String name) {
+        return em.createQuery(
+                        "SELECT user FROM User user WHERE user.name =:username", User.class)
+                .setParameter("username", name)
+                .getSingleResult();
     }
 
     @Override
